@@ -1,0 +1,20 @@
+- hosts: all
+  tasks:
+  - name: Gather xz version
+    command: xz --version
+    register: xz_version_output
+
+  - name: Parse XZ Utils version
+    set_fact:
+      xz_version: "{{ xz_version_output.stdout_lines[0] | regex_search('xz \\(XZ Utils\\) (\\d+\\.\\d+\\.\\d+)', '\\1') }}"
+
+#  - name: Display the info you have gathered
+#    debug: var=xz_version_output
+#
+#  - name: Display the info you have gathered
+#    debug: var=xz_version
+
+  - name: If you see 5.6.0 or 5.6.1, you are vulnerable and you need to downgrade.
+    fail:
+      msg: "Your version is {{ xz_version[0] }}. You are vulnerable and you need to downgrade."
+    when: xz_version[0] in ['5.6.0', '5.6.1']
